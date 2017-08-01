@@ -1,0 +1,6 @@
+[submodule "Assets/GameCore"]
+	path = Assets/GameCore
+	url = https://github.com/arguskos/GameRoomCore
+[submodule "ASsets/GameCore"]
+	path = ASsets/GameCore
+	url = https://github.com/arguskos/GameRoomCore

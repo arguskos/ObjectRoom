@@ -3,15 +3,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnerdyCenter : MonoBehaviour,IEnergyReciever
+public class EnerdyCenter : MonoBehaviour
 {
 	public int HitsToWin=3;
+	public static EnerdyCenter Instance;
 
 	private int _currentHit;
 	// Use this for initialization
-	void Start () {
-		
+	 void Start()
+	{
+		if ( Instance==null)
+		{
+			Instance=this;
+		}
 	}
+	
 
 	
 
@@ -35,10 +41,10 @@ public class EnerdyCenter : MonoBehaviour,IEnergyReciever
 		}
 	}
 
-	public void Disconnected()
+	public void SwitchOff()
 	{
 		print("energy cnenter disconnceted");
 		
-		_currentHit--;
+		_currentHit=0;
 	}
 }

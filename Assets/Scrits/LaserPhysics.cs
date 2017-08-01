@@ -6,8 +6,8 @@ using UnityEngine;
 public class LaserPhysics : LaserDistributer
 {
 	private bool _connectedToCenter;
-	private IEnergyReciever _reciever;
-	public bool Activated;
+	private bool _switchable=false;
+	public bool WasPowered;
 	// Use this for initialization
 	void Start()
 	{
@@ -16,25 +16,19 @@ public class LaserPhysics : LaserDistributer
 		///Activated;
 	}
 
+	
+	public void SetDirection()
+	{ 
+		Origin=transform.position;
+		Dir=transform.right;
+
+	}
 	public override void Toggle()
 	{
 	}
 
 	// Update is called once per frame
-	void Update()
-	{
-		if (Activated)
-		{
-			DistribueteLaser();
-		}
-	}
-
-	public override  void Connected()
-	{
-		base.Connected();
-		print ("connected") ;
-		Activated = true;
-	}
 
 
+	
 }

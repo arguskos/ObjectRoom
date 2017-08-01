@@ -1,27 +1,47 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Security.Cryptography;
-using UnityEditor;
 using UnityEngine;
 
 public class GameManagerBase : MonoBehaviour
 {
 
-	public static GameManagerBase Instance;
 
 	public GameMoment[] Moments;
-
-
+	private static int _score ;
+	public static int Score { get
+		{
+			return _score;
+		}
+		set
+		{
+			_score = value;
+			if (OnScoreChange!=null)
+				OnScoreChange();
+		}
+	}
 	public float GameTime = 20;
 	private float _passedTime;
 	private int _currentMoment;
-	public List<Dictionary<string, MinMaxPair>> AllData = new List<Dictionary<string, MinMaxPair>>();
-	private Dictionary<string, float> ReturnInfo = new Dictionary<string, float>();
-	enum Parametrs { TargetSpeed, WallsAmout }
-	public float GetParameter(string name)
+	public List<Dictionary<Parameters.ParamsName, MinMaxPair>> AllData = new List<Dictionary<Parameters.ParamsName, MinMaxPair>>();
+
+	public List<List<MomentInfo>> AllMomentsInfo = new List<List<MomentInfo>>();
+
+	private Dictionary<Parameters.ParamsName, float> ReturnInfo = new Dictionary<Parameters.ParamsName, float>();
+
+	//private List<MomentInfo>  ReturnInfo = new List<MomentInfo>();
+	public Action OnNewMoment;
+	
+	public float GetParameter(Parameters.ParamsName name)
 	{
-		return ReturnInfo[name];
+		
+		return ReturnInfo[Parameters.GetParameter(name)];
 	}
+
+
+	public delegate void ScoreChange();
+	public  static  ScoreChange OnScoreChange;
 
 	/// <summary>
 	/// Create serise of parameters with name (moments)
@@ -30,28 +50,28 @@ public class GameManagerBase : MonoBehaviour
 	/// For every object in a scene with interface bla call function do on spread calls....
 	/// 
 	/// </summary>
-	void Awake()
-	{
-		Instance = this;
-	}
+
 	// Use this for initialization
-	protected void Start()
+	protected virtual void Start()
 	{
-		print("start");
+		Score = 0;
 		//TargetSpeed = Moments[_currentMoment].MinTargetSpeed;
 		//WallsToPlace = Moments[_currentMoment].MinWalls;
 		//get all data 
 		foreach (var moment in Moments)
 		{
 			moment.Init();
-			print(moment.name);
+
 			AllData.Add(moment.MomentInfo);
 		}
-		foreach (var entery in AllData[0])
+		if (AllData.Count > 0)
 		{
-			print(entery.Key);
-			ReturnInfo.Add(entery.Key, entery.Value.Min);
+			foreach (var entery in AllData[0])
+			{
 
+				ReturnInfo.Add(entery.Key, entery.Value.Min);
+
+			}
 		}
 	}
 
@@ -64,19 +84,19 @@ public class GameManagerBase : MonoBehaviour
 	{
 		//send score...
 	}
-	public void OnNewMoment()
-	{
-		//WallsPlacer.Instance.OnNewMoment();
-	}
+
 
 	// Update is called once per frame
-	protected void Update()
+	protected virtual void Update()
 	{
+
+		
 		_passedTime += Time.deltaTime;
 		//print((_passedTime - GameTime / Moments.Length * _currentMoment+GameTime/Moments.Length) / 3.333*(_currentMoment+1));
 		//print((GameTime / Moments.Length * (_currentMoment + 1)));
 		if (_currentMoment < Moments.Length)
 		{
+
 			float percentageForCurrentMoment = (_passedTime - (GameTime / Moments.Length * _currentMoment)) / (GameTime / Moments.Length);
 			//TargetSpeed = (Moments[_currentMoment].MaxTargetSpeed- Moments[_currentMoment].MinTargetSpeed )* percentageForCurrentMoment;
 			//WallsToPlace =(int)((Moments[_currentMoment].MaxWalls - Moments[_currentMoment].MinWalls) * percentageForCurrentMoment );
@@ -97,10 +117,13 @@ public class GameManagerBase : MonoBehaviour
 
 			if (_passedTime > GameTime / Moments.Length * (_currentMoment + 1))
 			{
-				print(_currentMoment);
+				print("Current moment"+_currentMoment+" of all "+ Moments.Length);
 				_currentMoment++;
-				OnNewMoment();
-			}
+			    if (OnNewMoment != null)
+			    {
+			        OnNewMoment();
+                }
+            }
 		}
 	}
 }

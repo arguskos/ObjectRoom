@@ -5,91 +5,130 @@ using UnityEngine;
 
 
 ///
-public class LaserDistributer : RodsBase,IEnergyReciever {
+public class LaserDistributer : RodsBase
+{
 
-	// Use this for initialization
-	private IEnergyReciever _reciever ;
-	
-	private IEnergyReciever Reciver {
-		get{return _reciever; }
-		set{
-			//Debug.Log("somebodyChaged Me");
-			_reciever=value;
-		}
+    // Use this for initialization
 
-		}
-	protected Vector3 Origin;
-	protected Vector3 Dir;
-	void Start () {
-		
-	}
+    public bool Powered { get; set; }
+    public bool Connected = false;
+    public Vector3 Origin;
+    public Vector3 Dir;
+    public Vector3 Target;
+    void Start()
+    {
+        SwitchOff();
+    }
+    public virtual void SwitchOff()
+    {
+        Powered = false;
+        Connected = false;
+    }
+    public void Connect()
+    {
+        if (Powered)
+            return;
+        Powered = true;
+        Ray r = new Ray(Origin, Dir);
+        print(Origin + "  " + Dir);
+        RaycastHit hit;
+        if (Physics.Raycast(r, out hit))
+        {
+            print("hit");
+            if (hit.transform.GetComponent<LaserDistributer>())
+            {
+                Connected = true;
+                Target = hit.point;
+                if (hit.transform.GetComponent<MirrorWalls>())
+                    hit.transform.GetComponent<MirrorWalls>().SetReflection(hit.point, Vector3.Reflect(r.direction, hit.normal));
+                else if (hit.transform.GetComponent<LaserPhysics>())
+                {
 
-	protected void DistribueteLaser()
-	{
-		Ray r = new Ray(Origin, Dir);
+                    hit.transform.GetComponent<LaserPhysics>().WasPowered = true;
+                }
+                hit.transform.GetComponent<LaserDistributer>().Connect();
+            }
 
-			RaycastHit hit;
-			if (Physics.Raycast(r, out hit))
-			{
-				//var c = (r.origin + r.direction) - 2 * (Vector3.Dot((r.origin + r.direction), hit.normal)) * hit.normal;
-		
-				Debug.DrawLine(Origin, hit.point, Color.red);
-				//Debug.DrawRay(hit.point, Vector3.Reflect(r.direction, hit.normal), Color.blue);
-				MirrorWalls wall = hit.transform.GetComponent<MirrorWalls>();
-				if (wall != null)
-				{
-					if (Reciver != null)
-							Reciver.Disconnected();
-						Reciver = hit.transform.GetComponent<IEnergyReciever>();
-						Reciver.Connected();
-					wall.SetReflection(hit.point, Vector3.Reflect(r.direction, hit.normal));
-					
-				}
-				else if (hit.transform.GetComponent<IEnergyReciever>() != null)
-				{
-					if (Reciver != hit.transform.GetComponent<IEnergyReciever>())
-					{
-						if (Reciver != null)
-							Reciver.Disconnected();
-						
-						Reciver = hit.transform.GetComponent<IEnergyReciever>();
-						if (Reciver!=null)
-						{
-							print (Reciver);
-							Reciver.Connected();
-						}
-							print (Reciver);
-							
-						//print("connect");
-					}
+            else if( hit.transform.GetComponent<EnerdyCenter>())
+            {
+                Connected = true;
+                Target = hit.point;
+                hit.transform.GetComponent<EnerdyCenter>().Connected();
+            }
+            else
+            {
+                Connected = false;
+            }
+        }
+    }
+    // hit.transform.GetComponent<MirrorWalls>().SetReflection(hit.point, Vector3.Reflect(r.direction, hit.normal));
 
-				}
-			}
-			else
-			{
-				Debug.DrawRay(r.origin, r.direction);
-			//	print("disconnect"+_reciever);
-				//print(_reciever);
-				if (Reciver!=null)
+    // protected void DistribueteLaser()
+    // {
+    //     //if (IsOn)
+    //    // {
+    //         Ray r = new Ray(Origin, Dir);
 
-				{
-					Reciver.Disconnected();
-					Reciver = null;
-				}
-			}
-	}
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    //         RaycastHit hit;
+    //         if (Physics.Raycast(r, out hit))
+    //         {
+    //             //var c = (r.origin + r.direction) - 2 * (Vector3.Dot((r.origin + r.direction), hit.normal)) * hit.normal;
 
-	public virtual void Connected()
-	{
-		print("base Connected");
-			}
+    //             Debug.DrawLine(Origin, hit.point, Color.red);
+    //             if (hit.transform.GetComponent<IEnergyReciever>() != null)
+    //             {
 
-	public virtual void Disconnected()
-	{
-		print("disconnected");
-	}
+    //                 if (_reciever != null)
+    //                 {
+    //                     if (_reciever == hit.transform.GetComponent<IEnergyReciever>())
+    //                         return;
+    //                     else
+    //                     {
+    //                         _reciever.Disconnected();
+
+    //                     }
+    //                 }
+    //                 _reciever = hit.transform.GetComponent<IEnergyReciever>();
+    //                 _reciever.Connected();
+    //                 // if (hit.transform.GetComponent<LaserDistributer>() != null)
+    //                 // {
+    //                 //     hit.transform.GetComponent<LaserDistributer>().IsOn = true;
+    //                 // }
+    //                 if (hit.transform.GetComponent<MirrorWalls>())
+    //                 {
+    //                     hit.transform.GetComponent<MirrorWalls>().SetReflection(hit.point, Vector3.Reflect(r.direction, hit.normal));
+    //                 }
+
+    //             }
+    //             else
+    //             {
+    //                 Debug.DrawRay(r.origin, r.direction);
+
+    //             }
+    //         }
+    //         else
+    //         {
+    //             if(_reciever!=null)
+    //                 _reciever.Disconnected();
+    //         }
+    //     //}
+    // }
+    // Update is called once per frame
+    void Update()
+    {
+        //aprint(Powered);
+
+        if (Connected)
+        {
+            Debug.DrawLine(Origin, Target, Color.red,0.2f);
+        }
+        else if (Powered)
+        {
+            Debug.DrawRay(Origin, Dir);
+        }
+
+
+
+    }
 }
+

@@ -19,7 +19,7 @@ public class RodsBase : MonoBehaviour
 		_parent.transform.position = new Vector3(transform.position.x, transform.position.y -1 / 2.0f, transform.position.z);
 		transform.parent = _parent.transform;
 		//StartCoroutine(Hide());
-		Toggle();
+		//Toggle();
 	}
 
 	public virtual void Toggle()
